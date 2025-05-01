@@ -116,7 +116,7 @@ type GetTransactionResponse struct {
 	Blocktime   *int64             `json:"blockTime,omitempty"`
 	Meta        any                `json:"meta"`
 	Slot        *uint64            `json:"slot,omitempty"`
-	Transaction any                `json:"transaction"`
+	Transaction solana.Transaction `json:"transaction"`
 	Version     any                `json:"version"`
 	Position    uint64             `json:"-"` // TODO: enable this
 	Signatures  []solana.Signature `json:"-"` // TODO: enable this

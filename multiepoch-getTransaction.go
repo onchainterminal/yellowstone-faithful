@@ -208,14 +208,14 @@ func (multi *MultiEpoch) handleGetTransaction(ctx context.Context, conn *request
 			response.Version = "legacy"
 		}
 
-		encodedTx, encodedMeta, err := encodeTransactionResponseBasedOnWantedEncoding(*params.Options.Encoding, tx, meta)
+		_, encodedMeta, err := encodeTransactionResponseBasedOnWantedEncoding(*params.Options.Encoding, tx, meta)
 		if err != nil {
 			return &jsonrpc2.Error{
 				Code:    jsonrpc2.CodeInternalError,
 				Message: "Internal error",
 			}, fmt.Errorf("failed to encode transaction: %w", err)
 		}
-		response.Transaction = encodedTx
+		response.Transaction = tx
 		response.Meta = encodedMeta
 	}
 
