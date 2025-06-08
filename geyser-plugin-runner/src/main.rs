@@ -4,6 +4,7 @@ use {
     solana_rpc::optimistically_confirmed_bank_tracker::SlotNotification,
     solana_runtime::bank::KeyedRewardsAndNumPartitions,
     solana_sdk::{reward_info::RewardInfo, reward_type::RewardType},
+    flate2::read::GzDecoder,
     std::{
         collections::HashSet,
         convert::{TryFrom, TryInto},
@@ -18,7 +19,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let file_path = args().nth(1).expect("no file given");
     let _started_at = std::time::Instant::now();
     let file = std::fs::File::open(file_path)?;
-    let reader = BufReader::with_capacity(8 * 1024 * 1024, file);
+    let gz = GzDecoder::new(file);
+    let reader = BufReader::with_capacity(8 * 1024 * 1024, gz);
     let mut item_index = 0;
     {
         let mut reader = node::NodeReader::new(reader)?;
