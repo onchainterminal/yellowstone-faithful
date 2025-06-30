@@ -1,5 +1,5 @@
 {
-	"libpath": "/path/to/demo-plugin/target/x86_64-unknown-linux-gnu/release/libdemo_plugin.so",
+	"libpath": "/Users/yosadchyi/workspace/oct/yellowstone-faithful/geyser-plugin-runner/demo-plugin/target/release/libdemo_plugin.dylib",
 	"host": "demo",
 	"user": "solana",
 	"port": 5433,

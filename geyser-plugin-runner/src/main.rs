@@ -38,11 +38,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             )
             .unwrap_or_else(|err| panic!("Failed to create GeyserPluginService, error: {:?}", err));
 
-        let transaction_notifier = service
-            .get_transaction_notifier()
-            .ok_or_else(|| panic!("Failed to get transaction notifier from GeyserPluginService"))
-            .unwrap();
-
         let entry_notifier_maybe = service.get_entry_notifier();
         if entry_notifier_maybe.is_some() {
             println!("Entry notifications enabled")
@@ -119,16 +114,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                                         sanitized_tx.err()
                                     );
                                 }
-                                let sanitized_tx = sanitized_tx.unwrap();
-
-                                transaction_notifier
-                                        .notify_transaction(
-                                            block.slot,
-                                            transaction.index.unwrap() as usize,
-                                            sanitized_tx.signature(),
-                                            &as_native_metadata,
-                                            &sanitized_tx,
-                                        );
                             }
                         }
 
@@ -161,6 +146,9 @@ fn main() -> Result<(), Box<dyn Error>> {
                     node::Node::Block(_block) => {
                         // println!("___ Block: {:?}", block);
                         let notification = SlotNotification::Root((block.slot, block.meta.parent_slot));
+                        if confirmed_bank_sender.is_empty() {
+                            return Ok(());
+                        }
                         confirmed_bank_sender.send(notification).unwrap();
 
                         {
