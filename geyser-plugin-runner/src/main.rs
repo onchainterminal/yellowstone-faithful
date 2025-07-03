@@ -29,14 +29,20 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         let geyser_config_files = &[std::path::PathBuf::from(args().nth(2).unwrap())];
 
-        let (confirmed_bank_sender, confirmed_bank_receiver) = unbounded();
+        // let (confirmed_bank_sender, confirmed_bank_receiver) = unbounded();
         // drop(confirmed_bank_sender);
+        let (confirmed_bank_sender, confirmed_bank_receiver) = crossbeam_channel::bounded(1024);
         let service =
             solana_geyser_plugin_manager::geyser_plugin_service::GeyserPluginService::new(
                 confirmed_bank_receiver,
                 geyser_config_files,
             )
             .unwrap_or_else(|err| panic!("Failed to create GeyserPluginService, error: {:?}", err));
+
+        let transaction_notifier = service
+            .get_transaction_notifier()
+            .ok_or_else(|| panic!("Failed to get transaction notifier from GeyserPluginService"))
+            .unwrap();
 
         let entry_notifier_maybe = service.get_entry_notifier();
         if entry_notifier_maybe.is_some() {
@@ -53,7 +59,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let nodes = reader.read_until_block()?;
             // println!("Nodes: {:?}", nodes.get_cids());
             let block = nodes.get_block()?;
-            println!("Slot: {:?}", block.slot);
+            // println!("Slot: {:?}", block.slot);
             // println!("Raw node: {:?}", raw_node);
             let mut entry_index: usize = 0;
             let mut this_block_executed_transaction_count: u64 = 0;
@@ -114,7 +120,18 @@ fn main() -> Result<(), Box<dyn Error>> {
                                         sanitized_tx.err()
                                     );
                                 }
-                            }
+                                let sanitized_tx = sanitized_tx.unwrap();
+
+                                transaction_notifier
+                                   .notify_transaction(
+                                       block.slot,
+                                       transaction.index.unwrap() as usize,
+                                       sanitized_tx.signature(),
+                                       &as_native_metadata,
+                                       &sanitized_tx,
+                                   );
+
+                           }
                         }
 
                         // if parsed.version()
@@ -131,7 +148,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                             return Ok(());
                         }
                         let entry_notifier = entry_notifier_maybe.as_ref().unwrap();
-                        // println!("___ Entry: {:?}", entry);
+                        // println!("___ Entry: {:?}", _entry);
                         let entry_summary=solana_entry::entry::EntrySummary {
                             num_hashes: _entry.num_hashes,
                             hash: solana_sdk::hash::Hash::from(_entry.hash.to_bytes()),
@@ -146,13 +163,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                     node::Node::Block(_block) => {
                         // println!("___ Block: {:?}", block);
                         let notification = SlotNotification::Root((block.slot, block.meta.parent_slot));
-                        if confirmed_bank_sender.is_empty() {
-                            return Ok(());
-                        }
                         confirmed_bank_sender.send(notification).unwrap();
 
                         {
                             if block_meta_notifier_maybe.is_none() {
+                                println!("block_meta_notifier empty");
                                 return Ok(());
                             }
                             let mut keyed_rewards = Vec::with_capacity(this_block_rewards.rewards.len());
@@ -207,7 +222,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                         println!("___ Epoch: {:?}", epoch);
                     }
                     node::Node::Rewards(rewards) => {
-                        println!("___ Rewards: {:?}", node_with_cid.get_cid());
+                        // println!("___ Rewards: {:?}", node_with_cid.get_cid());
                         // println!("___ Next items: {:?}", rewards.data.next);
 
                         #[allow(clippy::overly_complex_bool_expr)]
