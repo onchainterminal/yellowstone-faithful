@@ -1403,33 +1403,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "demo-rust-ipld-car"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "bincode",
- "cid",
- "crc",
- "crossbeam-channel",
- "flate2",
- "fnv",
- "multihash",
- "prost 0.11.9",
- "serde",
- "serde_cbor",
- "serde_json",
- "solana-accounts-db",
- "solana-entry",
- "solana-geyser-plugin-manager",
- "solana-rpc",
- "solana-runtime",
- "solana-sdk",
- "solana-storage-proto",
- "solana-transaction-status",
- "zstd",
-]
-
-[[package]]
 name = "demo-transaction-status-ffi"
 version = "0.1.0"
 dependencies = [
@@ -2006,6 +1979,34 @@ dependencies = [
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "geyser_plugin_runner"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "bincode",
+ "cid",
+ "crc",
+ "crossbeam-channel",
+ "flate2",
+ "fnv",
+ "multihash",
+ "prost 0.11.9",
+ "serde",
+ "serde_cbor",
+ "serde_json",
+ "solana-accounts-db",
+ "solana-entry",
+ "solana-geyser-plugin-manager",
+ "solana-rpc",
+ "solana-runtime",
+ "solana-sdk",
+ "solana-storage-proto",
+ "solana-transaction-status",
+ "tokio",
+ "zstd",
 ]
 
 [[package]]

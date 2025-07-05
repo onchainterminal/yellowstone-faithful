@@ -1,6 +1,7 @@
 use {
     crossbeam_channel::unbounded,
-    demo_rust_ipld_car::{node, utils},
+    command::TcpCommandServer,
+    geyser_plugin_runner::{node, utils},
     solana_rpc::optimistically_confirmed_bank_tracker::SlotNotification,
     solana_runtime::bank::KeyedRewardsAndNumPartitions,
     solana_sdk::{reward_info::RewardInfo, reward_type::RewardType},
@@ -14,6 +15,7 @@ use {
         str::FromStr,
     },
 };
+use geyser_plugin_runner::command;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let file_path = args().nth(1).expect("no file given");
@@ -25,6 +27,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     {
         let mut reader = node::NodeReader::new(reader)?;
         let header = reader.read_raw_header()?;
+        let command_server = TcpCommandServer::new("127.0.0.1:9292");
         println!("Header bytes: {:?}", header);
 
         let geyser_config_files = &[std::path::PathBuf::from(args().nth(2).unwrap())];
@@ -55,6 +58,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         let mut todo_previous_blockhash = solana_sdk::hash::Hash::default();
         let mut todo_latest_entry_blockhash = solana_sdk::hash::Hash::default();
+
+        println!("waiting for command to start reading...");
+        command_server.wait_for_go();
+
+        println!("command received, starting read loop");
         loop {
             let nodes = reader.read_until_block()?;
             // println!("Nodes: {:?}", nodes.get_cids());

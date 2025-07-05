@@ -9,3 +9,4 @@ pub mod rewards;
 pub mod subset;
 pub mod transaction;
 pub mod utils;
+pub mod command;

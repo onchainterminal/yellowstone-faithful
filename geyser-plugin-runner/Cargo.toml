@@ -1,5 +1,5 @@
 [package]
-name = "demo-rust-ipld-car"
+name = "geyser_plugin_runner"
 version = "0.1.0"
 edition = "2021"
 publish = false
@@ -26,3 +26,4 @@ solana-sdk = { workspace = true }
 solana-storage-proto = { workspace = true }
 solana-transaction-status = { workspace = true }
 zstd = { workspace = true }
+tokio = "1.43.0"
